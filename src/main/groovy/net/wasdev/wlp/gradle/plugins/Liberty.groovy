@@ -41,6 +41,8 @@ class Liberty implements Plugin<Project> {
 
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
+        project.configurations.create('libertyFeature')
+        project.configurations.libertyFeature.extendsFrom(project.configurations.compile)
 
         //Used to set project facets in Eclipse
         project.pluginManager.apply('eclipse-wtp')
