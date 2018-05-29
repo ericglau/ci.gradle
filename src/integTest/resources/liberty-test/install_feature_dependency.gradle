@@ -17,7 +17,7 @@ apply plugin: 'liberty'
 repositories {
     mavenCentral()
     maven {
-        url "file:///Users/ibm/Documents/ciRepos/ci.gradle/src/integTest/resources/liberty-test/features-repo"
+        url "file:///Users/michaelzhang/Documents/installCiGradle/ci.gradle/src/integTest/resources/liberty-test/features-repo"
     }
 }
 
