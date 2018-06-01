@@ -23,10 +23,10 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class InstallFeature_dependency extends AbstractIntegrationTest{
+class InstallFeature_server extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/liberty-test")
-    static File buildDir = new File(integTestDir, "/InstallFeature_dependency")
-    static File buildFilename = new File(resourceDir, "install_feature_dependency.gradle")
+    static File buildDir = new File(integTestDir, "/InstallFeature_server")
+    static File buildFilename = new File(resourceDir, "install_feature_server.gradle")
 
     @BeforeClass
     public static void setup() {
