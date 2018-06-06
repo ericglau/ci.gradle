@@ -25,6 +25,14 @@ import net.wasdev.wlp.common.plugins.util.PluginScenarioException
 
 class InstallFeatureTask extends AbstractServerTask {
 
+    InstallFeatureTask() {
+        configure({
+            description 'Install a new feature to the Liberty server'
+            logging.level = LogLevel.INFO
+            group 'Liberty'
+        })
+    }
+
     private class InstallFeatureTaskUtil extends InstallFeatureUtil {
         public InstallFeatureTaskUtil(File installDir, String from, String to, Set<String> pluginListedEsas)  throws PluginScenarioException, PluginExecutionException {
             super(installDir, from, to, pluginListedEsas);
