@@ -106,7 +106,7 @@ class InstallFeatureTask extends AbstractServerTask {
         }
 
         def dependencyFeatures = getDependencyFeatures()
-        def serverFeatures = util.getServerFeatures(getServerDir(project), pluginListedFeatures.isEmpty())
+        def serverFeatures = getServerDir(project).exists() ? util.getServerFeatures(getServerDir(project)) : null
 
         Set<String> featuresToInstall = InstallFeatureUtil.combineToSet(pluginListedFeatures, dependencyFeatures, serverFeatures)
 
