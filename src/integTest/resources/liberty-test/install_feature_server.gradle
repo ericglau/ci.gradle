@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name = 'Sonatype Nexus Snapshots'
+            url = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+    }
+    dependencies {
+        classpath group: 'net.wasdev.wlp.gradle.plugins', name: 'liberty-gradle-plugin', version: lgpVersion
+    }
+}
+
+apply plugin: 'liberty'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "file:///Users/michaelzhang/Documents/installCiGradle/ci.gradle/src/integTest/resources/liberty-test/features-repo"
+    }
+}
+
+dependencies {
+    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: runtimeVersion
+}
+
+liberty {
+    server{
+        name = 'LibertyProjectServer'
+        features {
+            name = ["jaxb-2.2"]
+            acceptLicense = true
+        }
+    }
+}
