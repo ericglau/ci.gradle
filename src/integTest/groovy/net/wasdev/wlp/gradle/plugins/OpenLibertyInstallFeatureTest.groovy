@@ -23,19 +23,26 @@ import org.junit.Test
 import org.junit.runners.MethodSorters
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class InstallFeature_dependency extends AbstractIntegrationTest{
-    static File resourceDir = new File("build/resources/integrationTest/liberty-test")
-    static File buildDir = new File(integTestDir, "/InstallFeature_dependency")
-    static File buildFilename = new File(resourceDir, "install_feature_dependency.gradle")
+class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
+    static File resourceDir = new File("build/resources/integrationTest/openliberty-install-feature-test")
+    static File buildDir = new File(integTestDir, "/openliberty-install-feature-test")
+    static File buildFilename = "build.gradle"
 
     @BeforeClass
     public static void setup() {
         createDir(buildDir)
-        copyBuildFiles(buildFilename, buildDir)
+        createTestProject(buildDir, resourceDir, buildFilename)
+        try {
+            runTasks(buildDir, "installLiberty", "overwriteServer", "libertyPackage")
+            deleteDir(new File(buildDir, "build/wlp"));
+        } catch (Exception e) {
+            throw new AssertionError ("Failed to package Open Liberty kernel. "+ e)
+        }
     }
 
     @Test
-    public void test_installFeature_single() {
+    public void test_installFeature_dependency() {
+        copyBuildFiles("install_feature_dependency.gradle", buildDir)
         try {
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.jaxb-2.2.mf")
             runTasks(buildDir, 'installFeature')
@@ -46,4 +53,5 @@ class InstallFeature_dependency extends AbstractIntegrationTest{
             throw new AssertionError ("Fail on task installFeature. "+e)
         }
     }
+
 }

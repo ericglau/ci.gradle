@@ -15,21 +15,24 @@ buildscript {
 apply plugin: 'liberty'
 
 repositories {
-    mavenCentral()
     maven {
-        url "file:///Users/michaelzhang/Documents/installCiGradle/ci.gradle/src/integTest/resources/liberty-test/features-repo"
+        url "file:///" + file("features-repo")
     }
+    mavenCentral()
 }
 
 dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: runtimeVersion
+    libertyFeature 'io.openliberty.features:jaxb-2.2:18.0.0.2'
 }
 
 liberty {
+    install {
+        runtimeUrl="file:///" + file("${project.buildDir}/openliberty-kernel.zip")
+    }
     server{
-        name = 'LibertyProjectServer'
+        name = 'dummy'
         features {
-            name = ["jaxb-2.2"]
+            // name = ["jaxb-2.2"]
             acceptLicense = true
         }
     }
