@@ -26,7 +26,7 @@ import org.junit.runners.MethodSorters
 class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/openliberty-install-feature-test")
     static File buildDir = new File(integTestDir, "/openliberty-install-feature-test")
-    static File buildFilename = "build.gradle"
+    static String buildFilename = "build.gradle"
 
     @BeforeClass
     public static void setup() {
@@ -42,7 +42,7 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
 
     @Test
     public void test_installFeature_dependency() {
-        copyBuildFiles("install_feature_dependency.gradle", buildDir)
+        copyBuildFiles(new File(resourceDir, "install_feature_dependency.gradle"), buildDir)
         try {
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.jaxb-2.2.mf")
             runTasks(buildDir, 'installFeature')
