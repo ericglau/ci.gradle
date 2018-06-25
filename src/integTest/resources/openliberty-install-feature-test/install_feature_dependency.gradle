@@ -16,23 +16,23 @@ apply plugin: 'liberty'
 
 repositories {
     maven {
-        url "file:///" + file("features-repo")
+        url file("features-repo").toURI().toURL().toString()
+        println "Using features-repo url: " + file("features-repo").toURI().toURL().toString()
     }
     mavenCentral()
 }
 
 dependencies {
-    libertyFeature 'io.openliberty.features:jaxb-2.2:18.0.0.2'
+    libertyFeature 'io.openliberty.features:a-1.0:18.0.0.2'
 }
 
 liberty {
     install {
-        runtimeUrl="file:///" + file("${project.buildDir}/openliberty-kernel.zip")
+        runtimeUrl=file("${project.buildDir}/openliberty-kernel.zip").toURI().toURL().toString()
     }
     server{
         name = 'dummy'
         features {
-            // name = ["jaxb-2.2"]
             acceptLicense = true
         }
     }
