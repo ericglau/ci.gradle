@@ -44,11 +44,11 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     public void test_installFeature_dependency() {
         copyBuildFiles(new File(resourceDir, "install_feature_dependency.gradle"), buildDir)
         try {
-            def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.jaxb-2.2.mf")
+            def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.a-1.0.mf")
             runTasks(buildDir, 'installFeature')
 
-            assert file.exists() : "com.ibm.websphere.appserver.jaxb-2.2.mf is not installed"
-            assert file.canRead() : "com.ibm.websphere.appserver.jaxb-2.2.mf cannot be read"
+            assert file.exists() : "com.ibm.websphere.appserver.a-1.0.mf is not installed"
+            assert file.canRead() : "com.ibm.websphere.appserver.a-1.0.mf cannot be read"
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installFeature. "+e)
         }
