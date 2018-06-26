@@ -15,11 +15,14 @@
  */
 package net.wasdev.wlp.gradle.plugins
 
+import static junit.framework.Assert.assertTrue
 import static org.junit.Assert.*
 
 import org.junit.After
 import org.junit.BeforeClass
 import org.junit.Test
+
+import net.wasdev.wlp.common.plugins.util.InstallFeatureUtil
 
 class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/openliberty-install-feature-test")
@@ -49,12 +52,34 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
         try {
             runTasks(buildDir, 'installFeature')
 
-            def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.a-1.0.mf")
-            assert file.exists() : "com.ibm.websphere.appserver.a-1.0.mf is not installed"
-            assert file.canRead() : "com.ibm.websphere.appserver.a-1.0.mf cannot be read"
+            assertInstalled("a-1.0")
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installFeature. "+e)
         }
+    }
+
+    protected void assertInstalled(String feature) throws Exception {
+        assertTrue("Feature " + feature + " was not installed into the lib/features directory", existsInFeaturesDirectory(feature));
+        String featureInfo = getFeatureInfo();
+        assertTrue("Feature " + feature + " was not installed according to productInfo featureInfo: " + featureInfo, featureInfo.contains(feature));
+    }
+    
+    protected boolean existsInFeaturesDirectory(String feature) {
+        File[] features;
+        File dir = new File(buildDir, "build/wlp/lib/features")
+
+        features = dir.listFiles(new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return name.toLowerCase().endsWith("." + feature + ".mf");
+                    }
+                });
+
+        return features.size() >= 1;
+    }
+    
+    protected String getFeatureInfo() throws Exception {
+        File installDirectory = new File(buildDir, "build/wlp")
+        return InstallFeatureUtil.productInfo(installDirectory, "featureInfo");
     }
 
 }
