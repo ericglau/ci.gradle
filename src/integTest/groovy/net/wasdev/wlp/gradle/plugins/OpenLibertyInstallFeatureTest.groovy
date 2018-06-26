@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corporation 2015, 2017.
+ * (C) Copyright IBM Corporation 2018.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,21 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
 
     @Test
-    public void test_installFeature_dependency() {
+    public void test_installFeature_dependency1() {
+        //copyBuildFiles(new File(resourceDir, "install_feature_dependency.gradle"), buildDir)
+        try {
+            def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.a-1.0.mf")
+            runTasks(buildDir, 'installLiberty')
+
+            assert file.exists() : "com.ibm.websphere.appserver.a-1.0.mf is not installed"
+            assert file.canRead() : "com.ibm.websphere.appserver.a-1.0.mf cannot be read"
+        } catch (Exception e) {
+            throw new AssertionError ("Fail on task installFeature. "+e)
+        }
+    }
+    
+    @Test
+    public void test_installFeature_dependency2() {
         copyBuildFiles(new File(resourceDir, "install_feature_dependency.gradle"), buildDir)
         try {
             def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.a-1.0.mf")
