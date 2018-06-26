@@ -66,9 +66,9 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     
     protected boolean existsInFeaturesDirectory(String feature) {
         File[] features;
-        File dir = new File(buildDir, "build/wlp/lib/features")
+        File featuresDir = new File(buildDir, "build/wlp/lib/features")
 
-        features = dir.listFiles(new FilenameFilter() {
+        features = featuresDir.listFiles(new FilenameFilter() {
                     public boolean accept(File dir, String name) {
                         return name.toLowerCase().endsWith("." + feature + ".mf");
                     }
