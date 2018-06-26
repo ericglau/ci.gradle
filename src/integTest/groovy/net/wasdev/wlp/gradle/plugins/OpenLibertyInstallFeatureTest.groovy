@@ -17,12 +17,10 @@ package net.wasdev.wlp.gradle.plugins
 
 import static org.junit.Assert.*
 
+import org.junit.After
 import org.junit.BeforeClass
-import org.junit.FixMethodOrder
 import org.junit.Test
-import org.junit.runners.MethodSorters
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     static File resourceDir = new File("build/resources/integrationTest/openliberty-install-feature-test")
     static File buildDir = new File(integTestDir, "/openliberty-install-feature-test")
@@ -39,28 +37,19 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
             throw new AssertionError ("Failed to package Open Liberty kernel. "+ e)
         }
     }
-
-    @Test
-    public void test_installFeature_dependency1() {
-        //copyBuildFiles(new File(resourceDir, "install_feature_dependency.gradle"), buildDir)
-        try {
-            def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.a-1.0.mf")
-            runTasks(buildDir, 'installLiberty')
-
-            assert file.exists() : "com.ibm.websphere.appserver.a-1.0.mf is not installed"
-            assert file.canRead() : "com.ibm.websphere.appserver.a-1.0.mf cannot be read"
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task installFeature. "+e)
-        }
+    
+    @After
+    public static void tearDown() {
+        deleteDir(new File(buildDir, "build/wlp"));
     }
     
     @Test
-    public void test_installFeature_dependency2() {
+    public void test_installFeature_dependency() {
         copyBuildFiles(new File(resourceDir, "install_feature_dependency.gradle"), buildDir)
         try {
-            def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.a-1.0.mf")
             runTasks(buildDir, 'installFeature')
 
+            def file = new File(buildDir, "build/wlp/lib/features/com.ibm.websphere.appserver.a-1.0.mf")
             assert file.exists() : "com.ibm.websphere.appserver.a-1.0.mf is not installed"
             assert file.canRead() : "com.ibm.websphere.appserver.a-1.0.mf cannot be read"
         } catch (Exception e) {
