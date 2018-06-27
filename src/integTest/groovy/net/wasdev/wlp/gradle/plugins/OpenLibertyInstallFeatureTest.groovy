@@ -47,24 +47,38 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
-    public void test_installFeature_dependency() {
-        copyBuildFiles(new File(resourceDir, "install_feature_dependency.gradle"), buildDir)
+    public void testInstallFeaturesDependencies() {
+        runInstallFeature("install_features_dependencies.gradle")
+        assertInstalled("a-1.0")
+    }
+    
+    @Test
+    public void testInstallFeaturesServer() {
+        copyServer("server_a.xml")
+        runInstallFeature("install_features_server.gradle")
+        assertInstalled("a-1.0")
+    }
+
+    private copyServer(String serverFile) {
+        copyFile(serverFile, new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
+    }
+    
+    private void runInstallFeature(String buildFile) {
+        copyBuildFiles(new File(resourceDir, buildFile), buildDir)
         try {
             runTasks(buildDir, 'installFeature')
-
-            assertInstalled("a-1.0")
         } catch (Exception e) {
             throw new AssertionError ("Fail on task installFeature. "+e)
         }
     }
 
-    protected void assertInstalled(String feature) throws Exception {
+    private void assertInstalled(String feature) throws Exception {
         assertTrue("Feature " + feature + " was not installed into the lib/features directory", existsInFeaturesDirectory(feature));
         String featureInfo = getFeatureInfo();
         assertTrue("Feature " + feature + " was not installed according to productInfo featureInfo: " + featureInfo, featureInfo.contains(feature));
     }
     
-    protected boolean existsInFeaturesDirectory(String feature) {
+    private boolean existsInFeaturesDirectory(String feature) {
         File[] features;
         File featuresDir = new File(buildDir, "build/wlp/lib/features")
 
@@ -77,7 +91,7 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
         return features.size() >= 1;
     }
     
-    protected String getFeatureInfo() throws Exception {
+    private String getFeatureInfo() throws Exception {
         File installDirectory = new File(buildDir, "build/wlp")
         return InstallFeatureUtil.productInfo(installDirectory, "featureInfo");
     }

@@ -16,20 +16,18 @@ apply plugin: 'liberty'
 
 repositories {
     maven {
-        url "file:///" + file("features-repo")
+        url file("features-repo").toURI().toURL().toString()
     }
     mavenCentral()
 }
 
-dependencies {
-    libertyRuntime group: 'com.ibm.websphere.appserver.runtime', name: 'wlp-javaee7', version: runtimeVersion
-}
-
 liberty {
+    install {
+        runtimeUrl=file("${project.buildDir}/openliberty-kernel.zip").toURI().toURL().toString()
+    }
     server{
-        name = 'LibertyProjectServer'
+        name = 'dummy'
         features {
-            name = ["jaxb-2.2"]
             acceptLicense = true
         }
     }
