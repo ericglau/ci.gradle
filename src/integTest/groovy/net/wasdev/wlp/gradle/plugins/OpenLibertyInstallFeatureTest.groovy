@@ -53,9 +53,20 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
-    public void testInstallFeaturesServer() {
+    public void testInstallFeaturesServer() {        
+        copyBuildFiles(new File(resourceDir, "install_features_server.gradle"), buildDir)
+        runTasks(buildDir, "libertyCreate")
         copyServer("server_a.xml")
-        runInstallFeature("install_features_server.gradle")
+        runTasks(buildDir, "installFeature")
+        assertInstalled("a-1.0")
+    }
+    
+    @Test
+    public void testInstallFeaturesServer2() {
+        copyBuildFiles(new File(resourceDir, "install_features_server.gradle"), buildDir)
+        runTasks(buildDir, "libertyCreate")
+        copyServer("server_a.xml")
+        runTasks(buildDir, "installAAAA")
         assertInstalled("a-1.0")
     }
 
