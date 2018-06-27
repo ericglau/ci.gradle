@@ -60,7 +60,7 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
 
     private copyServer(String serverFile) {
-        copyFile(serverFile, new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
+        copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
     }
     
     private void runInstallFeature(String buildFile) {
