@@ -48,28 +48,9 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
-    public void testInstallFeaturesDependencies() {
-        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        
-        // sanity check
-        assertFalse("Feature b-1.0 should not have been installed", getFeatureInfo().contains("b-1.0"));
-    }
-    
-    @Test
-    public void testInstallFeaturesDependenciesEmptyServer() {
-        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
-        runTasks(buildDir, "libertyCreate")
-        copyServer("server_empty.xml")
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-        
-        // sanity check
-        assertFalse("Feature b-1.0 should not have been installed", getFeatureInfo().contains("b-1.0"));
-    }
-    
-    @Test
+    /**
+     * Install with identical dependencies
+     */
     public void testInstallFeaturesDependenciesAlreadyInstalled() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
@@ -79,6 +60,9 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
+    /**
+     * Install with more dependencies
+     */
     public void testInstallFeaturesDependenciesInstallMore() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
@@ -92,6 +76,50 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
+    /**
+     * Install with dependencies
+     */
+    public void testInstallFeaturesDependencies() {
+        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("a-1.0")
+        
+        // sanity check
+        assertFalse("Feature b-1.0 should not have been installed", getFeatureInfo().contains("b-1.0"));
+    }
+    
+    @Test
+    /**
+     * Install with dependencies and an empty server.xml
+     */
+    public void testInstallFeaturesDependenciesEmptyServer() {
+        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
+        runTasks(buildDir, "libertyCreate")
+        copyServer("server_empty.xml")
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("a-1.0")
+        
+        // sanity check
+        assertFalse("Feature b-1.0 should not have been installed", getFeatureInfo().contains("b-1.0"));
+    }
+    
+    @Test
+    /**
+     * Install with dependencies and plugin listed features, and an empty server.xml
+     */
+    public void testInstallFeaturesDependenciesPluginListEmptyServer() {
+        copyBuildFiles(new File(resourceDir, "install_features_dependencies_pluginlist.gradle"), buildDir)
+        runTasks(buildDir, "libertyCreate")
+        copyServer("server_empty.xml")
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("a-1.0")
+        assertInstalled("b-1.0")
+    }
+    
+    @Test
+    /**
+     * Install with dependencies and plugin listed features, then again with more plugin listed features
+     */
     public void testInstallFeaturesDependenciesPluginListInstallMore() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies_pluginlist.gradle"), buildDir)
         runTasks(buildDir, 'installFeature')
@@ -107,16 +135,21 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
-    public void testInstallFeaturesDependenciesPluginListEmptyServer() {
-        copyBuildFiles(new File(resourceDir, "install_features_dependencies_pluginlist.gradle"), buildDir)
+    /**
+     * Install with the same feature in dependencies and server.xml
+     */
+    public void testInstallFeaturesDependenciesServerIdentical() {
+        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
         runTasks(buildDir, "libertyCreate")
-        copyServer("server_empty.xml")
+        copyServer("server_a.xml")
         runTasks(buildDir, 'installFeature')
         assertInstalled("a-1.0")
-        assertInstalled("b-1.0")
     }
-        
+    
     @Test
+    /**
+     * Install with different features in dependencies and server.xml
+     */
     public void testInstallFeaturesDependenciesServer() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
         runTasks(buildDir, "libertyCreate")
@@ -127,15 +160,9 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
-    public void testInstallFeaturesDependenciesServerIdentical() {
-        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
-        runTasks(buildDir, "libertyCreate")
-        copyServer("server_a.xml")
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("a-1.0")
-    }
-    
-    @Test
+    /**
+     * Install with different features in dependencies, server.xml, and plugin listed features
+     */
     public void testInstallFeaturesDependenciesServerPluginList() {
         copyBuildFiles(new File(resourceDir, "install_features_dependencies_pluginlist.gradle"), buildDir)
         runTasks(buildDir, "libertyCreate")
@@ -147,19 +174,25 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @Test
-    public void testInstallFeaturesServer() {        
+    /**
+     * Install with only plugin listed features
+     */
+    public void testInstallFeaturesPluginList() {
+        copyBuildFiles(new File(resourceDir, "install_features_pluginlist.gradle"), buildDir)
+        runTasks(buildDir, 'installFeature')
+        assertInstalled("b-1.0")
+    }
+    
+    @Test
+    /**
+     * Install with only server.xml features
+     */
+    public void testInstallFeaturesServer() {
         copyBuildFiles(new File(resourceDir, "install_features_server.gradle"), buildDir)
         runTasks(buildDir, "libertyCreate")
         copyServer("server_a.xml")
         runTasks(buildDir, "installFeature")
         assertInstalled("a-1.0")
-    }
-    
-    @Test
-    public void testInstallFeaturesPluginList() {
-        copyBuildFiles(new File(resourceDir, "install_features_pluginlist.gradle"), buildDir)
-        runTasks(buildDir, 'installFeature')
-        assertInstalled("b-1.0")
     }
     
     private copyServer(String serverFile) {
