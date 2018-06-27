@@ -37,7 +37,7 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
             runTasks(buildDir, "installLiberty", "overwriteServer", "libertyPackage")
             deleteDir(new File(buildDir, "build/wlp"));
         } catch (Exception e) {
-            throw new AssertionError ("Failed to package Open Liberty kernel. "+ e)
+            throw new AssertionError("Failed to package Open Liberty kernel.", e)
         }
     }
     
@@ -48,7 +48,8 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     
     @Test
     public void testInstallFeaturesDependencies() {
-        runInstallFeature("install_features_dependencies.gradle")
+        copyBuildFiles(new File(resourceDir, "install_features_dependencies.gradle"), buildDir)
+        runTasks(buildDir, 'installFeature')
         assertInstalled("a-1.0")
     }
     
@@ -61,26 +62,8 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
         assertInstalled("a-1.0")
     }
     
-    @Test
-    public void testInstallFeaturesServer2() {
-        copyBuildFiles(new File(resourceDir, "install_features_server.gradle"), buildDir)
-        runTasks(buildDir, "libertyCreate")
-        copyServer("server_a.xml")
-        runTasks(buildDir, "installAAAA")
-        assertInstalled("a-1.0")
-    }
-
     private copyServer(String serverFile) {
         copyFile(new File(resourceDir, serverFile), new File(buildDir, "build/wlp/usr/servers/dummy/server.xml"))
-    }
-    
-    private void runInstallFeature(String buildFile) {
-        copyBuildFiles(new File(resourceDir, buildFile), buildDir)
-        try {
-            runTasks(buildDir, 'installFeature')
-        } catch (Exception e) {
-            throw new AssertionError ("Fail on task installFeature. "+e)
-        }
     }
 
     private void assertInstalled(String feature) throws Exception {
