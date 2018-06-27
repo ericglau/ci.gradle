@@ -42,7 +42,7 @@ class OpenLibertyInstallFeatureTest extends AbstractIntegrationTest{
     }
     
     @After
-    public static void tearDown() {
+    public void tearDown() {
         deleteDir(new File(buildDir, "build/wlp"));
     }
     
