@@ -120,7 +120,9 @@ The `group` value for all the artifacts listed below is `com.ibm.websphere.appse
 
 |`name` | Versions | Description |
 | --- | ----------------- | ----------- |
+| [wlp-javaee8](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee8/) | 18.0.0.2 | WebSphere Liberty runtime with all Java EE 8 Full Platform features. |
 | [wlp-javaee7](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-javaee7/) | 18.0.0.2, 18.0.0.1, 17.0.0.4, 17.0.0.3, 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3, 16.0.0.2, 8.5.5.9, 8.5.5.8, 8.5.5.7, 8.5.5.6 | WebSphere Liberty runtime with all Java EE 7 Full Platform features. |
+| [wlp-webProfile8](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile8/) | 18.0.0.2 | WebSphere Liberty runtime with Java EE 8 Web Profile features. |
 | [wlp-webProfile7](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-webProfile7/) | 18.0.0.2, 18.0.0.1, 17.0.0.4, 17.0.0.3, 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3, 16.0.0.2, 8.5.5.9, 8.5.5.8, 8.5.5.7, 8.5.5.6 | WebSphere Liberty runtime with Java EE 7 Web Profile features. |
 | [wlp-kernel](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-kernel/) | 18.0.0.2, 18.0.0.1, 17.0.0.4, 17.0.0.3, 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3, 16.0.0.2, 8.5.5.9, 8.5.5.8 | WebSphere Liberty runtime kernel. |
 | [wlp-osgi](https://repo1.maven.org/maven2/com/ibm/websphere/appserver/runtime/wlp-osgi/) | 18.0.0.2, 18.0.0.1, 17.0.0.4, 17.0.0.3, 17.0.0.2, 17.0.0.1, 16.0.0.4, 16.0.0.3, 16.0.0.2, 8.5.5.9, 8.5.5.8 | WebSphere Liberty runtime with features that support OSGi applications. |
