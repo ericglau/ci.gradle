@@ -16,7 +16,7 @@ The Liberty Gradle plugin defines the `libertyFeature` dependency configuration 
 
 The `libertyFeature` dependency configuration can install features in Liberty runtime versions 18.0.0.2 and above. Use the `io.openliberty.features` group for Open Liberty features, or the `com.ibm.websphere.appserver.features` group for WebSphere Liberty features.
 
-You need to include `group`, `name`, and `version` values that describes the artifacts to use. An `ext` value for the ESA file type can be used but is not required.
+You need to include `group`, `name`, and `version` values that describes the artifacts to use. An `ext` value for the ESA file type is not required.
 
 ### dependsOn
 `installFeature` depends on `installLiberty`. If no specific features are requested, `installFeature` depends on `libertyCreate` to evaluate the set of features in the server configuration file.
