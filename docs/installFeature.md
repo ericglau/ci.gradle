@@ -1,7 +1,14 @@
 ## installFeature task
-The `installFeature` task installs features packaged as a Subsystem Archive (ESA file) to the Liberty runtime. The `installFeature` task can install a list of features to the Liberty runtime, or it can install a set of features based on the server configuration file.
-  
-This goal is not supported if the Liberty runtime is installed from the Open Liberty runtime package. You will get a missing file error since the `bin/installUtiltiy` command is removed from the Open Liberty runtime package. The Open Liberty runtime is always bundled with all applicable features and there isn't any need to install any additional feature.  
+The `installFeature` task installs features packaged as a Subsystem Archive (ESA file) to the Liberty runtime. 
+
+In Open Liberty and WebSphere Liberty runtime versions 18.0.0.2 and above, this task can install features specified in the following ways:
+* Using the `libertyFeature` dependency configuration,
+* features listed in the `name` attribute,
+* features declared in the `server.xml` file, its `include` elements, and from additional configuration files in the `configDropins` directory.
+
+In WebSphere Liberty runtime versions 18.0.0.1 and below, this task will install features specified in the `name` attribute. To install the missing features declared in the `server.xml` file (including its `include` elements, and from additional configuration files in the `configDropins` directory), set the `acceptLicense` attribute to `true` but do not specify any `name` attribute.
+
+In Open Liberty runtime versions 18.0.0.1 and below, this task will be skipped. A warning message will be displayed. The Open Liberty runtime versions 18.0.0.1 and below are bundled with all applicable features. There is no need to install or uninstall additional features.
 
 ### dependsOn
 `installFeature` depends on `installLiberty`. If no specific features are requested, `installFeature` depends on `libertyCreate` to evaluate the set of features in the server configuration file.
