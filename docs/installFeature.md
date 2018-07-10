@@ -68,7 +68,47 @@ liberty {
 }
 ```
 
-3. The following uses the server's `server.xml` file to install all configured features.
+3. Install features from dependencies in Liberty runtime versions 18.0.0.2 and above.
+
+* Open Liberty features:
+```groovy
+apply plugin: 'liberty'
+
+dependencies {
+    libertyFeature 'io.openliberty.features:jaxrs-2.1:18.0.0.2'
+    libertyFeature 'io.openliberty.features:jsonp-1.1:18.0.0.2'
+}
+
+liberty {
+
+    server {
+        features {
+            acceptLicense = true
+        }
+    }
+}
+```
+
+* WebSphere Liberty features:
+```groovy
+apply plugin: 'liberty'
+
+dependencies {
+    libertyFeature 'com.ibm.websphere.appserver.features:servlet-3.0:18.0.0.2'
+    libertyFeature 'io.openliberty.features:localConnector-1.0:18.0.0.2'
+}
+
+liberty {
+
+    server {
+        features {
+            acceptLicense = true
+        }
+    }
+}
+```
+
+4. The following uses the server's `server.xml` file to install all configured features.
 ```groovy
 /* Install all features configured by the server */
 apply plugin: 'liberty'
