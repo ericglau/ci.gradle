@@ -450,11 +450,14 @@ class DevTask extends AbstractServerTask {
                 :libertyCreate
                 :compileJava
                 :processResources
+                :compileTest
+                :processTestResources
                 :classes
                 :war
                 :deploy
              */
             runGradleTask(gradleBuildLauncher, 'libertyCreate');
+            runGradleTask(gradleBuildLauncher, true, 'compileJava', 'processResources', 'compileTestJava', 'processTestResources');
             runGradleTask(gradleBuildLauncher, 'installFeature');
             runGradleTask(gradleBuildLauncher, 'deploy');
         } finally {
@@ -508,10 +511,17 @@ class DevTask extends AbstractServerTask {
     }
 
     static void runGradleTask(BuildLauncher buildLauncher, String ... tasks)  {
+        runGradleTask(buildLauncher, false, tasks);
+    }
+
+    static void runGradleTask(BuildLauncher buildLauncher, boolean ignoreFailure, String ... tasks)  {
         buildLauncher
                 .setStandardOutput(System.out)
                 .setStandardError(System.err);
         buildLauncher.forTasks(tasks);
+        if (ignoreFailure) {
+            buildLauncher.withArguments('--continue');
+        }
         buildLauncher.run();
     }
 
