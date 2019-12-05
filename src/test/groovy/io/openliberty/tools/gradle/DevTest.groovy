@@ -1,0 +1,209 @@
+/*
+ * (C) Copyright IBM Corporation 2019.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.openliberty.tools.gradle
+
+import static junit.framework.Assert.assertEquals
+import static org.junit.Assert.*
+
+
+import java.io.BufferedWriter;
+import org.apache.commons.io.FileUtils;
+import java.io.File;
+//import java.nio.file.Path;
+//import java.nio.file.Files;
+//import java.nio.file.Paths;
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.AfterClass
+import org.junit.Test
+
+class DevTest extends AbstractIntegrationTest{
+    static File resourceDir = new File("build/resources/test/dev-test")
+    static File buildDir = new File(integTestDir, "dev-test")
+    static String buildFilename = "build.gradle"
+
+   static File targetDir;
+   static BufferedWriter writer;
+    static File logFile = new File(buildDir, "output.log");
+   static Process process;
+
+    @BeforeClass
+    public static void setup() {
+        createDir(buildDir)
+        createTestProject(buildDir, resourceDir, buildFilename)
+    }
+    
+    @Test
+    /**
+     * Install with identical dependencies
+     */
+    public void testInstallFeaturesDependenciesAlreadyInstalled() {
+        //copyBuildFiles(new File(resourceDir, "demo-devmode.gradle"), buildDir)
+        
+        runDevMode()
+        
+    }
+
+
+    private static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
+        //PrintStream old = System.out;
+        //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        /*try {            
+            //PrintStream ps = new PrintStream(baos);
+            //System.setOut(ps);
+
+            Thread serverThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("Starting dev mode");
+                    runTasks(buildDir, 'libertyDev')
+                }
+            });
+
+            serverThread.start();
+            Thread.sleep(10000);
+        } finally {
+           // System.out.flush();
+          //  System.setOut(old);
+           // System.out.println("Here: " + baos.toString());
+
+        }
+*/
+
+        
+
+      //  int timeoutSeconds = 60;
+
+      //  long timeoutMilliseconds = timeoutSeconds * 1000;
+       // while()
+ System.out.println("Starting dev mode!");
+startProcess(null, true);
+
+ Scanner scanner = new Scanner(logFile);
+
+      while (scanner.hasNextLine()) {
+         String line = scanner.nextLine();
+         System.out.println(line);
+      }
+
+ System.out.println("Done dev mode");
+   }
+
+   private static ProcessBuilder buildProcess(String processCommand) {
+      ProcessBuilder builder = new ProcessBuilder();
+      builder.directory(buildDir);
+
+      String os = System.getProperty("os.name");
+      if (os != null && os.toLowerCase().startsWith("windows")) {
+         builder.command("CMD", "/C", processCommand);
+      } else {
+         builder.command("bash", "-c", processCommand);
+      }
+      return builder;
+   }
+
+    protected static boolean checkLogMessage(int timeout, String message)
+         throws InterruptedException, FileNotFoundException {
+      int waited = 0;
+      boolean startFlag = false;
+      while (!startFlag && waited <= timeout) {
+         int sleep = 10;
+         Thread.sleep(sleep);
+         waited += sleep;
+         if (readFile(message, logFile)) {
+            startFlag = true;
+            Thread.sleep(1000);
+         }
+      }
+      return (waited > timeout);
+   }
+
+      private static boolean readFile(String str, File file) throws FileNotFoundException {
+      Scanner scanner = new Scanner(file);
+
+      while (scanner.hasNextLine()) {
+         String line = scanner.nextLine();
+         if (line.contains(str)) {
+            return true;
+         }
+      }
+      return false;
+   }
+
+   private static void startProcess(String params, boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
+      StringBuilder command = new StringBuilder("gradle libertyDev");
+      if (params != null) {
+         command.append(" " + params);
+      }
+      ProcessBuilder builder = buildProcess(command.toString());
+
+      builder.redirectOutput(logFile);
+      builder.redirectError(logFile);
+      process = builder.start();
+      assertTrue(process.isAlive());
+
+      OutputStream stdin = process.getOutputStream();
+
+      writer = new BufferedWriter(new OutputStreamWriter(stdin));
+
+      // check that the server has started
+      Thread.sleep(5000);
+      assertFalse(checkLogMessage(120000, "CWWKF0011I"));
+      if (isDevMode) {
+          assertFalse(checkLogMessage(60000, "Enter key to run tests on demand"));
+      }
+
+      // verify that the target directory was created
+      targetDir = new File(buildDir, "build");
+      assertTrue(targetDir.exists());
+   }
+
+    
+    @AfterClass
+   public static void cleanUpAfterClass() throws Exception {
+      cleanUpAfterClass(true);
+   }
+
+   protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
+      stopProcess(isDevMode);
+
+      if (buildDir != null && buildDir.exists()) {
+         FileUtils.deleteDirectory(buildDir);
+      }
+
+      if (logFile != null && logFile.exists()) {
+      //   assertTrue(logFile.delete());
+      }
+   }
+
+      private static void stopProcess(boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
+      // shut down dev mode
+      if (writer != null) {
+         if(isDevMode) {
+            writer.write("exit"); // trigger dev mode to shut down
+         }
+         else {
+            process.destroy(); // stop run
+         }
+         writer.flush();
+         writer.close();
+
+         // test that dev mode has stopped running
+         assertFalse(checkLogMessage(100000, "CWWKE0036I"));
+      }
+   }
+    
+}
