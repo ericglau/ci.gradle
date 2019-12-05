@@ -31,8 +31,10 @@ import org.junit.AfterClass
 import org.junit.Test
 
 class DevTest extends AbstractIntegrationTest{
-    static File resourceDir = new File("build/resources/test/dev-test")
-    static File buildDir = new File(integTestDir, "dev-test")
+    static final String projectName = "basic-dev-project";
+
+    static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
+    static File buildDir = new File(integTestDir, "dev-test/" + projectName)
     static String buildFilename = "build.gradle"
 
    static File targetDir;
@@ -47,10 +49,7 @@ class DevTest extends AbstractIntegrationTest{
     }
     
     @Test
-    /**
-     * Install with identical dependencies
-     */
-    public void testInstallFeaturesDependenciesAlreadyInstalled() {
+    public void testBasicDevProject() {
         //copyBuildFiles(new File(resourceDir, "demo-devmode.gradle"), buildDir)
         
         runDevMode()
