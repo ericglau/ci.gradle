@@ -13,26 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.openliberty.tools.gradle
+package io.openliberty.tools.gradle;
 
-import static junit.framework.Assert.assertEquals
-import static org.junit.Assert.*
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.*;
 
-
-import java.io.BufferedWriter
-import org.apache.commons.io.FileUtils
-import java.io.File
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.AfterClass
-import org.junit.Test
+import java.io.BufferedWriter;
+import org.apache.commons.io.FileUtils;
+import java.io.File;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.AfterClass;
+import org.junit.Test;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 class DevTest extends AbstractIntegrationTest {
     static final String projectName = "basic-dev-project";
 
     static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
-    static File buildDir = new File(integTestDir, "dev-test/" + projectName)
-    static String buildFilename = "build.gradle"
+    static File buildDir = new File(integTestDir, "dev-test/" + projectName);
+    static String buildFilename = "build.gradle";
 
     static File targetDir;
     static BufferedWriter writer;
@@ -41,23 +44,18 @@ class DevTest extends AbstractIntegrationTest {
 
     @BeforeClass
     public static void setup() {
-        createDir(buildDir)
-        createTestProject(buildDir, resourceDir, buildFilename)
+        createDir(buildDir);
+        createTestProject(buildDir, resourceDir, buildFilename);
     }
     
     @Test
     public void testBasicDevProject() {
-        runDevMode()
+        runDevMode();
     }
 
     private static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
         System.out.println("Starting dev mode...");
         startProcess(null, true);
-        Scanner scanner = new Scanner(logFile);
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            System.out.println(line);
-        }
         System.out.println("Exited dev mode");
     }
 
@@ -132,6 +130,11 @@ class DevTest extends AbstractIntegrationTest {
 
     @AfterClass
     public static void cleanUpAfterClass() throws Exception {
+        Path path = logFile.toPath();
+        Charset charset = StandardCharsets.UTF_8;
+        String content = new String(Files.readAllBytes(path), charset);
+        System.out.println("Dev mode output: " + content);
+
         cleanUpAfterClass(true);
     }
 
