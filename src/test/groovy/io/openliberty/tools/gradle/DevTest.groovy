@@ -151,12 +151,17 @@ class DevTest extends AbstractIntegrationTest {
     protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
         stopProcess(isDevMode);
 
+        long deleteTimeout = 30000;
+
         if (buildDir != null && buildDir.exists()) {
-            FileUtils.deleteDirectory(buildDir);
+            long startTime = System.currentTimeMillis();
+            while(!FileUtils.deleteQuietly(buildDir) && System.currentTimeMillis() < startTime + deleteTimeout) {
+                Thread.sleep(1000);
+            }
         }
 
         if (logFile != null && logFile.exists()) {
-            assertTrue(logFile.delete());
+            logFile.delete();
         }
     }
 
