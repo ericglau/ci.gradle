@@ -101,10 +101,20 @@ class DevTest extends AbstractIntegrationTest {
     }
 
     private static void startProcess(String params, boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
-        StringBuilder command = new StringBuilder("gradle libertyDev");
+        // get gradle wrapper from project root dir
+        File gradlew;
+        String os = System.getProperty("os.name");
+        if (os != null && os.toLowerCase().startsWith("windows")) {
+            gradlew = new File("gradlew.bat")
+        } else {
+            gradlew = new File("gradlew")
+        }
+        
+        StringBuilder command = new StringBuilder(gradlew.getAbsolutePath() + " libertyDev");
         if (params != null) {
             command.append(" " + params);
         }
+        System.out.println("Running command: " + command.toString());
         ProcessBuilder builder = buildProcess(command.toString());
 
         builder.redirectOutput(logFile);
