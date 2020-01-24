@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2014, 2020.
+ * (C) Copyright IBM Corporation 2014, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,21 +113,21 @@ class DeployTask extends AbstractServerTask {
     }
 
     private void installProjectArchive(Task task, String appsDir) {
-        String archiveBaseName
+        String baseName
         String fileName
         if("springboot".equals(getPackagingType())) {
-            archiveBaseName = springBootTask.baseName
+            baseName = springBootTask.baseName
             installSpringBootFeatureIfNeeded()
             String targetThinAppPath = invokeThinOperation(appsDir)
             fileName = targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1)
-            validateAppConfig(targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1), archiveBaseName, appsDir)
+            validateAppConfig(targetThinAppPath.substring(targetThinAppPath.lastIndexOf("/") + 1), baseName, appsDir)
         } else {
-            archiveBaseName = task.baseName
+            baseName = task.baseName
             fileName = getArchiveName(task)
             Files.copy(task.archivePath.toPath(), new File(getServerDir(project), "/" + appsDir + "/" + getArchiveName(task)).toPath(), StandardCopyOption.REPLACE_EXISTING)
-            validateAppConfig(getArchiveName(task), archiveBaseName, appsDir)
+            validateAppConfig(getArchiveName(task), task.baseName, appsDir)
         }
-        validateAppConfig(fileName, archiveBaseName, appsDir)
+        validateAppConfig(fileName, baseName, appsDir)
         verifyAppStarted(fileName, appsDir)
     }
 

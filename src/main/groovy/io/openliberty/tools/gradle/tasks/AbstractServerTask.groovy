@@ -1,5 +1,5 @@
 /**
- * (C) Copyright IBM Corporation 2017, 2020.
+ * (C) Copyright IBM Corporation 2017, 2019.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.War
-import org.gradle.api.tasks.Internal
 import org.gradle.plugins.ear.Ear
 
 import java.nio.file.Files
@@ -70,8 +69,8 @@ abstract class AbstractServerTask extends AbstractTask {
     protected List<String> combinedJvmOptions = null
     protected Map<String,String> combinedEnvProperties = null
 
-    protected def server
-    protected def springBootBuildTask
+    def server
+    def springBootBuildTask
 
     private enum PropertyType {
         BOOTSTRAP("liberty.server.bootstrapProperties"),
@@ -822,7 +821,6 @@ abstract class AbstractServerTask extends AbstractTask {
         }
     }
 
-    @Internal
     protected String getPackagingType() throws Exception{
       if (project.plugins.hasPlugin("war") || !project.tasks.withType(War).isEmpty()) {
           if (project.plugins.hasPlugin("org.springframework.boot")) {
@@ -851,7 +849,6 @@ abstract class AbstractServerTask extends AbstractTask {
       return false
     }
 
-    @Internal
     protected List<File> getApplicationFilesFromConfiguration() {
         List<File> appFiles = new ArrayList<File>()
 

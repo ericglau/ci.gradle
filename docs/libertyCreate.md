@@ -4,7 +4,11 @@ The `libertyCreate` task is used to create a named Liberty server instance.
 
 ### dependsOn
 
-`libertyCreate` depends on `installFeature`.
+`libertyCreate` depends on `installLiberty`.
+
+### finalizedBy
+
+`libertyCreate` is finalized by `installFeature` if features are configured in the `build.gradle` file.
 
 ### Properties
 
