@@ -17,6 +17,9 @@ package io.openliberty.tools.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.logging.LogLevel
@@ -42,6 +45,14 @@ import java.util.concurrent.TimeUnit
 
 class DevTask extends AbstractServerTask {
 
+    private static final String LIBERTY_HOSTNAME = "liberty.hostname";
+    private static final String LIBERTY_HTTP_PORT = "liberty.http.port";
+    private static final String LIBERTY_HTTPS_PORT = "liberty.https.port";
+    private static final String MICROSHED_HOSTNAME = "microshed_hostname";
+    private static final String MICROSHED_HTTP_PORT = "microshed_http_port";
+    private static final String MICROSHED_HTTPS_PORT = "microshed_https_port";
+    private static final String WLP_USER_DIR_PROPERTY_NAME = "wlp.user.dir";
+
     DevTask() {
         configure({
             description 'Runs a Liberty server in dev mode'
@@ -50,6 +61,8 @@ class DevTask extends AbstractServerTask {
         })
     }
 
+    @Optional
+    @Input
     DevTaskUtil util = null;
 
     // Default DevMode argument values
@@ -76,6 +89,8 @@ class DevTask extends AbstractServerTask {
         this.skipTests = skipTests;
     }
 
+    @Optional
+    @Input
     Boolean libertyDebug;
 
     // Need to use a string value to allow someone to specify --libertyDebug=false
@@ -86,6 +101,8 @@ class DevTask extends AbstractServerTask {
         this.libertyDebug = Boolean.parseBoolean(libertyDebug)
     }
 
+    @Optional
+    @Input
     Integer libertyDebugPort;
 
     @Option(option = 'libertyDebugPort', description = 'The debug port that you can attach a debugger to. The default value is 7777.')
@@ -134,6 +151,8 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    @Optional
+    @Input
     Boolean clean;
 
     @Option(option = 'clean', description = 'Clean all cached information on server start up. The default value is false.')
@@ -141,8 +160,12 @@ class DevTask extends AbstractServerTask {
         this.clean = clean;
     }
 
+    @Optional
+    @InputDirectory
     File sourceDirectory;
 
+    @Optional
+    @InputDirectory
     File testSourceDirectory;
 
     private class DevTaskUtil extends DevUtil {
@@ -160,7 +183,7 @@ class DevTask extends AbstractServerTask {
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true);
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true, true);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -275,6 +298,7 @@ class DevTask extends AbstractServerTask {
                 newProject = builder
                         .withProjectDir(project.rootDir)
                         .withGradleUserHomeDir(project.gradle.gradleUserHomeDir)
+                        .withName(project.name)
                         .build();
 
                 // need this for gradle to evaluate the project
@@ -451,7 +475,9 @@ class DevTask extends AbstractServerTask {
                     runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
                 } catch (BuildException e) {
-                    logger.error('Failed to install features from configuration file', e);
+                    // stdout/stderr from the installFeature task is sent to the terminal
+                    // only need to log the actual stacktrace when debugging
+                    logger.debug('Failed to install features from configuration file', e);
                 } finally {
                     gradleConnection.close();
                 }
@@ -473,7 +499,9 @@ class DevTask extends AbstractServerTask {
                 }
                 return true;
             } catch (BuildException e) {
-                logger.error('Unable to compile', e);
+                // stdout/stderr from the compile task is sent to the terminal
+                // only need to log the actual stacktrace when debugging
+                logger.debug('Unable to compile', e);
                 return false;
             } finally {
                 gradleConnection.close();
@@ -490,7 +518,31 @@ class DevTask extends AbstractServerTask {
             ProjectConnection gradleConnection = initGradleProjectConnection();
             BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
 
+            ArrayList<String> systemPropertyArgs = new ArrayList<String>();
+
+            if (util.getHostName() != null) {
+                systemPropertyArgs.push("-D" + LIBERTY_HOSTNAME + "=" + util.getHostName());
+                systemPropertyArgs.push("-D" + MICROSHED_HOSTNAME + "=" + util.getHostName());
+            }
+
+            if (util.getHttpPort() != null) {
+                systemPropertyArgs.push("-D" + LIBERTY_HTTP_PORT + "=" + util.getHttpPort());
+                systemPropertyArgs.push("-D" + MICROSHED_HTTP_PORT + "=" + util.getHttpPort());
+            }
+
+            if (util.getHttpsPort() != null) {
+                systemPropertyArgs.push("-D" + LIBERTY_HTTPS_PORT + "=" + util.getHttpsPort());
+                systemPropertyArgs.push("-D" + MICROSHED_HTTPS_PORT + "=" + util.getHttpsPort());
+            }
+
             try {
+                systemPropertyArgs.push("-D" + WLP_USER_DIR_PROPERTY_NAME + "=" + getUserDir(project).getCanonicalPath());
+            } catch (IOException e) {
+                throw new PluginExecutionException("Could not resolve canonical path of the user directory: " + getUserDir(project).getAbsolutePath(), e);
+            }
+
+            try {
+                gradleBuildLauncher.withArguments(systemPropertyArgs);
                 // Force tests to run by calling cleanTest first
                 // otherwise tests may be skipped with an UP-TO-DATE message
                 // https://docs.gradle.org/current/userguide/java_testing.html#sec:forcing_java_tests_to_run
@@ -705,8 +757,11 @@ class DevTask extends AbstractServerTask {
         // configuration parameter is not specified.
         try {
             util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
-        } catch (PluginScenarioException e) { // this exception is caught when the server has been stopped by another process
-            logger.info(e.getMessage());
+        } catch (PluginScenarioException e) {
+            if (e.getMessage() != null) {
+                // a proper message is included in the exception if the server has been stopped by another process
+                logger.info(e.getMessage());
+            }
             return; // enter shutdown hook
         }
     }

@@ -26,6 +26,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.testing.Test
 
 import java.util.Properties
 
@@ -37,8 +38,6 @@ class Liberty implements Plugin<Project> {
     void apply(Project project) {
         project.extensions.create('liberty', LibertyExtension)
         project.extensions.create('arquillianConfiguration', ArquillianExtension)
-
-        project.liberty.servers = project.container(ServerExtension)
 
         project.configurations.create('libertyLicense')
         project.configurations.create('libertyRuntime')
@@ -57,23 +56,32 @@ class Liberty implements Plugin<Project> {
         //Create expected server extension from liberty extension data
         project.afterEvaluate {
             setEclipseFacets(project)
-            if (isSingleServerProject(project)) {
-                setDeployExtension(project)
-                new LibertySingleServerTasks(project).applyTasks()
-            } else if (isMultiServerProject(project)) {
-                new LibertyMultiServerTasks(project).applyTasks()
-            } else if (project.liberty.server != null && !project.liberty.servers.isEmpty()){
-                throw new GradleException('Both a \'server\' and \'servers\' extension were found in a build.gradle file that uses the liberty plugin. Please define multiple servers inside of the Liberty \'servers\' extension in your build.gradle file.')
-            }
-            if (project.liberty.server == null && project.liberty.servers.isEmpty()) {
-                project.liberty.server = copyProperties(project.liberty)
-                setDeployExtension(project)
-                new LibertySingleServerTasks(project).applyTasks()
-            }
+            new LibertyTasks(project).applyTasks()
+
             //Checking serverEnv files for server properties
             Liberty.checkEtcServerEnvProperties(project)
 
             setEclipseClasspath(project)
+        }
+
+        // Dev-mode needs to propagate these system properties from the gradle JVM
+        // to the JVM that will be used to run the tests.
+        def propagatedSystemProperties = [
+            "liberty.hostname",
+            "liberty.http.port",
+            "liberty.https.port",
+            "microshed_hostname",
+            "microshed_http_port",
+            "microshed_https_port",
+            "wlp.user.dir"
+        ];
+        project.tasks.withType(Test) { testTask ->
+            propagatedSystemProperties.each { propertyKey ->
+                def propertyValue = System.getProperty(propertyKey);
+                if (propertyValue != null) {
+                    testTask.systemProperty(propertyKey, propertyValue);
+                }
+            }
         }
     }
 
@@ -130,24 +138,6 @@ class Liberty implements Plugin<Project> {
         }
     }
 
-    private ServerExtension copyProperties(LibertyExtension liberty) {
-        def serverMap = new ServerExtension().getProperties()
-        def libertyMap = liberty.getProperties()
-
-        serverMap.keySet().each { String element ->
-            if (element.equals("name")) {
-                serverMap.put(element, libertyMap.get("serverName"))
-            }
-            else {
-                serverMap.put(element, libertyMap.get(element))
-            }
-        }
-        serverMap.remove('class')
-        serverMap.remove('outputDir')
-
-        return ServerExtension.newInstance(serverMap)
-    }
-
     public static void checkEtcServerEnvProperties(Project project) {
         if (project.liberty.outputDir == null) {
             Properties envProperties = new Properties()
@@ -177,25 +167,5 @@ class Liberty implements Plugin<Project> {
         } else {
            return new File(project.liberty.installDir)
         }
-    }
-
-    private static setDeployExtension(Project project) {
-        if (project.liberty.server.deploy == null) {
-            project.liberty.server.deploy = new DeployExtension()
-        }
-    }
-
-    boolean isSingleServerProject(Project project) {
-        if (project.liberty.server != null && project.liberty.servers.isEmpty()) {
-            return true
-        }
-        return false
-    }
-
-    boolean isMultiServerProject(Project project) {
-        if (!project.liberty.servers.isEmpty() && project.liberty.server == null) {
-            return true
-        }
-        return false
     }
 }
