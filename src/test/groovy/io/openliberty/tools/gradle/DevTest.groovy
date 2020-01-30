@@ -32,9 +32,11 @@ import java.nio.file.Path;
 class DevTest extends AbstractIntegrationTest {
     static final String projectName = "basic-dev-project";
 
-    static File resourceDir = new File("build/resources/test/dev-test/" + projectName);
+    static File resourceDir = new File("build/resources/test/dev-test");
+    static File projectResourceDir = new File(resourceDir, projectName);
     static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
     static String buildFilename = "build.gradle";
+    static File buildFile = new File(buildDir, buildFilename);
 
     static File targetDir;
     static BufferedWriter writer;
@@ -44,14 +46,14 @@ class DevTest extends AbstractIntegrationTest {
     @BeforeClass
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
-        createTestProject(buildDir, resourceDir, buildFilename);
+        createTestProject(buildDir, projectResourceDir, buildFilename);
         runDevMode();
     }
     
     private static void runDevMode() throws IOException, InterruptedException, FileNotFoundException {
         System.out.println("Starting dev mode...");
         startProcess(null, true);
-        System.out.println("Exited dev mode");
+        System.out.println("Started dev mode");
     }
 
     private static ProcessBuilder buildProcess(String processCommand) {
@@ -144,7 +146,7 @@ class DevTest extends AbstractIntegrationTest {
         assertTrue(srcServerXML.exists());
         assertTrue(targetServerXML.exists());
 
-        replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.1</feature>", srcServerXML);
+        replaceString("</feature>", "</feature>\n" + "    <feature>mpMetrics-2.0</feature>", srcServerXML);
 
         // check for application updated message
         assertFalse(checkLogMessage(60000, "CWWKZ0003I"));
@@ -154,7 +156,7 @@ class DevTest extends AbstractIntegrationTest {
         try {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                if (line.contains("<feature>mpHealth-2.1</feature>")) {
+                if (line.contains("<feature>mpMetrics-2.0</feature>")) {
                     foundUpdate = true;
                     break;
                 }
@@ -264,20 +266,20 @@ class DevTest extends AbstractIntegrationTest {
     protected static void cleanUpAfterClass(boolean isDevMode) throws Exception {
         stopProcess(isDevMode);
 
-        if (buildDir != null && buildDir.exists()) {
-            try {
-                FileUtils.deleteDirectory(buildDir);
-            } catch (IOException e) {
-                // https://github.com/OpenLiberty/open-liberty/issues/10562 prevents a file from being deleted.
-                // Instead of failing here, just print an error until the above is fixed
-                System.out.println("Could not clean up the build directory " + buildDir + ", IOException: " + e.getMessage());
-                e.printStackTrace();
-            } 
-        }
+        // if (buildDir != null && buildDir.exists()) {
+        //     try {
+        //         FileUtils.deleteDirectory(buildDir);
+        //     } catch (IOException e) {
+        //         // https://github.com/OpenLiberty/open-liberty/issues/10562 prevents a file from being deleted.
+        //         // Instead of failing here, just print an error until the above is fixed
+        //         System.out.println("Could not clean up the build directory " + buildDir + ", IOException: " + e.getMessage());
+        //         e.printStackTrace();
+        //     } 
+        // }
 
-        if (logFile != null && logFile.exists()) {
-            assertTrue(logFile.delete());
-        }
+        // if (logFile != null && logFile.exists()) {
+        //     assertTrue(logFile.delete());
+        // }
     }
 
     private static void stopProcess(boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
@@ -295,6 +297,48 @@ class DevTest extends AbstractIntegrationTest {
             // test that dev mode has stopped running
             assertFalse(checkLogMessage(100000, "CWWKE0036I"));
         }
+    }
+
+
+    @Test
+    public void resolveDependencyTest() throws Exception {      
+        assertFalse(checkLogMessage(10000,  "Press the Enter key to run tests on demand."));
+
+        // create the HealthCheck class, expect a compilation error
+        File systemHealthRes = new File(resourceDir, "SystemLivenessCheck.java");
+        assertTrue(systemHealthRes.exists());
+        File systemHealthSrc = new File(buildDir, "src/main/java/com/demo/SystemLivenessCheck.java");
+        File systemHealthTarget = new File(targetDir, "classes/java/main/com/demo/SystemLivenessCheck.class");
+
+        FileUtils.copyFile(systemHealthRes, systemHealthSrc);
+        assertTrue(systemHealthSrc.exists());
+        
+        assertFalse(checkLogMessage(200000, "Source compilation had errors"));
+        assertFalse(systemHealthTarget.exists());
+        
+        // add mpHealth dependency to build.gradle
+        String placeHolderComment = "// placeholder";
+        replaceString(placeHolderComment, " ", buildFile);
+
+        // the above string replacement seems to temporarily corrupt build.gradle,
+        // so touch it again to refresh changes afterwards
+        Thread.sleep(1000);
+        file.setLastModified(System.currentTimeMillis());
+
+        // don't verify if feature has been installed since it may have been installed by another test,
+        // and gradle does not log installFeature output
+        
+        String str = "// testing";
+        BufferedWriter javaWriter = new BufferedWriter(new FileWriter(systemHealthSrc, true));
+        javaWriter.append(' ');
+        javaWriter.append(str);
+
+        javaWriter.close();
+
+        Thread.sleep(1000); // wait for compilation
+        assertFalse(checkLogMessage(100000, "Source compilation was successful."));
+        Thread.sleep(15000); // wait for compilation
+        assertTrue(systemHealthTarget.exists());
     }
     
 }

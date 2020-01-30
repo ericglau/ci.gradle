@@ -25,7 +25,9 @@ repositories {
 dependencies {
     // provided dependencies
     providedCompile "jakarta.platform:jakarta.jakartaee-api:8.0.0"
-    providedCompile "org.eclipse.microprofile:microprofile:3.2"
+    // providedCompile "org.eclipse.microprofile:microprofile:3.2"
+
+    // placeholder providedCompile "io.openliberty.features:mpHealth-2.0:$runtimeVersion"
 
     libertyRuntime "$runtimeGroup:$runtimeArtifactId:$runtimeVersion"
 
