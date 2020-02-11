@@ -236,6 +236,11 @@ class DevTask extends AbstractServerTask {
         }
 
         @Override
+        public String getServerStartTimeoutExample() {
+            return "'gradle libertyDev --serverStartTimeout=90'";
+        }
+
+        @Override
         public void stopServer() {
             if (isLibertyInstalled(project)) {
                 if (getServerDir(project).exists()) {
@@ -471,6 +476,11 @@ class DevTask extends AbstractServerTask {
                 // Call the installFeature gradle task using the temporary serverDir directory that DevMode uses
                 ProjectConnection gradleConnection = initGradleProjectConnection();
                 BuildLauncher gradleBuildLauncher = gradleConnection.newBuild();
+
+                // Exclude libertyCreate from the task dependencies, so that it will not update the server features
+                // before the features are installed.
+                gradleBuildLauncher.withArguments("--exclude-task", "libertyCreate");
+
                 try {
                     runGradleTask(gradleBuildLauncher, "installFeature", "--serverDir=${serverDir.getAbsolutePath()}");
                     this.existingFeatures.addAll(features);
@@ -685,7 +695,8 @@ class DevTask extends AbstractServerTask {
         if (serverDirectory.exists()) {
             if (ServerStatusUtil.isServerRunning(serverInstallDir, serverOutputDir, serverName)) {
                 throw new Exception("The server " + serverName
-                        + " is already running. Terminate all instances of the server before starting dev mode.");
+                        + " is already running. Terminate all instances of the server before starting dev mode."
+                        + " You can stop a server instance with the command 'gradle libertyStop'.");
             }
         }
 
