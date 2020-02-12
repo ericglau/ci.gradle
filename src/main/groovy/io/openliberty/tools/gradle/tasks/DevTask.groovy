@@ -74,6 +74,8 @@ class DevTask extends AbstractServerTask {
     private static final boolean DEFAULT_HOT_TESTS = false;
     private static final boolean  DEFAULT_SKIP_TESTS = false;
     private static final boolean DEFAULT_LIBERTY_DEBUG = true;
+    private static final boolean DEFAULT_POLLING = false;
+    private static final long DEFAULT_POLLING_INTERVAL = 100;
 
     private Boolean hotTests;
 
@@ -688,6 +690,14 @@ class DevTask extends AbstractServerTask {
 
         if (libertyDebug == null) {
             libertyDebug = DEFAULT_LIBERTY_DEBUG;
+        }
+
+        if (polling == null) {
+            polling = DEFAULT_POLLING;
+        }
+
+        if (pollingInterval == null) {
+            pollingInterval = DEFAULT_POLLING_INTERVAL;
         }
     }
 
