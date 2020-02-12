@@ -151,6 +151,25 @@ class DevTask extends AbstractServerTask {
         }
     }
 
+    private Boolean polling;
+
+    @Option(option = 'polling', description = 'If this option is enabled, poll for file changes instead of using file system notifications. The default value is false.')
+    void setPolling(boolean polling) {
+        this.polling = polling;
+    }
+
+    private Long pollingInterval;
+
+    @Option(option = 'pollingInterval', description = 'Polling interval in milliseconds. The default value is 100 seconds. This parameter is only used if polling is enabled.')
+    void setPollingInterval(String pollingInterval) {
+        try {
+            this.pollingInterval = pollingInterval.toLong();
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Unexpected value: %s for dev mode option pollingInterval. pollingInterval should be a valid long.", pollingInterval));
+            throw e;
+        }
+    }
+
     @Optional
     @Input
     Boolean clean;
@@ -179,11 +198,13 @@ class DevTask extends AbstractServerTask {
         DevTaskUtil(File serverDirectory, File sourceDirectory, File testSourceDirectory,
                     File configDirectory, List<File> resourceDirs, boolean  hotTests,
                     boolean  skipTests, String artifactId, int serverStartTimeout,
-                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug
+                    int verifyAppStartTimeout, int appUpdateTimeout, double compileWait, boolean libertyDebug,
+                    boolean polling, long pollingInterval
         ) throws IOException {
             super(serverDirectory, sourceDirectory, testSourceDirectory, configDirectory, resourceDirs,
                     hotTests, skipTests, false, false, artifactId,  serverStartTimeout,
-                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true, true);
+                    verifyAppStartTimeout, appUpdateTimeout, ((long) (compileWait * 1000L)), libertyDebug, true, true,
+                    polling, pollingInterval);
 
             ServerFeature servUtil = getServerFeatureUtil();
             this.existingFeatures = servUtil.getServerFeatures(serverDirectory);
@@ -738,7 +759,8 @@ class DevTask extends AbstractServerTask {
         util = new DevTaskUtil(
                 serverDirectory, sourceDirectory, testSourceDirectory, configDirectory,
                 resourceDirs, hotTests.booleanValue(), skipTests.booleanValue(), artifactId, serverStartTimeout.intValue(),
-                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue()
+                verifyAppStartTimeout.intValue(), verifyAppStartTimeout.intValue(), compileWait.doubleValue(), libertyDebug.booleanValue(),
+                polling.booleanValue(), pollingInterval.longValue()
         );
 
         util.addShutdownHook(executor);
@@ -767,7 +789,7 @@ class DevTask extends AbstractServerTask {
         // which is where the server.xml is located if a specific serverXmlFile
         // configuration parameter is not specified.
         try {
-            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile, true);
+            util.watchFiles(buildFile, outputDirectory, testOutputDirectory, executor, artifactPaths, serverXMLFile);
         } catch (PluginScenarioException e) {
             if (e.getMessage() != null) {
                 // a proper message is included in the exception if the server has been stopped by another process
