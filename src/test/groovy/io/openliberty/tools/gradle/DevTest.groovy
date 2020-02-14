@@ -41,6 +41,8 @@ class DevTest extends AbstractIntegrationTest {
     static File logFile = new File(buildDir, "output.log");
     static Process process;
 
+    File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
+
     @BeforeClass
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
         createDir(buildDir);
@@ -67,9 +69,14 @@ class DevTest extends AbstractIntegrationTest {
         return builder;
     }
 
-    protected static boolean checkLogMessage(int timeout, String message)
+    protected static boolean checkOutputMessage(int timeout, String message)
             throws InterruptedException, FileNotFoundException {
-        checkLogMessage(timeout, message, logFile)
+        checkLogMessage(timeout, message, logFile);
+    }
+
+    protected static boolean checkServerMessage(int timeout, String message)
+           throws InterruptedException, FileNotFoundException {
+        checkLogMessage(timeout, message, messagesLogFile);
     }
 
     protected static boolean checkLogMessage(int timeout, String message, File file)
@@ -131,9 +138,9 @@ class DevTest extends AbstractIntegrationTest {
 
         // check that the server has started
         Thread.sleep(5000);
-        assertFalse(checkLogMessage(120000, "CWWKF0011I"));
+        assertFalse(checkServerMessage(120000, "CWWKF0011I"));
         if (isDevMode) {
-            assertFalse(checkLogMessage(60000, "Enter key to run tests on demand"));
+            assertFalse(checkOutputMessage(60000, "Enter key to run tests on demand"));
         }
 
         // verify that the target directory was created
@@ -152,8 +159,7 @@ class DevTest extends AbstractIntegrationTest {
         replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.0</feature>", srcServerXML);
 
         // check for server configuration was successfully updated message in messages.log
-        File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
-        assertFalse(checkLogMessage(60000, "CWWKG0017I", messagesLogFile));
+        assertFalse(checkServerMessage(60000, "CWWKG0017I", messagesLogFile));
         Thread.sleep(2000);
         Scanner scanner = new Scanner(targetServerXML);
         boolean foundUpdate = false;
@@ -239,12 +245,12 @@ class DevTest extends AbstractIntegrationTest {
 
     @Test
     public void manualTestsInvocationTest() throws Exception {
-        assertFalse(checkLogMessage(2000,  "Press the Enter key to run tests on demand."));
+        assertFalse(checkOutputMessage(2000,  "Press the Enter key to run tests on demand."));
 
         writer.write("\n");
         writer.flush();
 
-        assertFalse(checkLogMessage(10000,  "Tests finished."));
+        assertFalse(checkOutputMessage(10000,  "Tests finished."));
     }
 
     protected static void replaceString(String str, String replacement, File file) throws IOException {
@@ -299,7 +305,7 @@ class DevTest extends AbstractIntegrationTest {
             writer.close();
 
             // test that dev mode has stopped running
-            assertFalse(checkLogMessage(100000, "CWWKE0036I"));
+            assertFalse(checkServerMessage(100000, "CWWKE0036I"));
         }
     }
     
