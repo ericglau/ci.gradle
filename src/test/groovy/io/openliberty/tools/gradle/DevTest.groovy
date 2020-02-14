@@ -36,12 +36,12 @@ class DevTest extends AbstractIntegrationTest {
     static File buildDir = new File(integTestDir, "dev-test/" + projectName + System.currentTimeMillis()); // append timestamp in case previous build was not deleted
     static String buildFilename = "build.gradle";
 
-    static File targetDir;
     static BufferedWriter writer;
     static File logFile = new File(buildDir, "output.log");
     static Process process;
 
-    File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
+    static File targetDir = new File(buildDir, "build");
+    static File messagesLogFile = new File(targetDir, "wlp/usr/servers/defaultServer/logs/messages.log");
 
     @BeforeClass
     public static void setup() throws IOException, InterruptedException, FileNotFoundException {
@@ -87,9 +87,13 @@ class DevTest extends AbstractIntegrationTest {
             int sleep = 10;
             Thread.sleep(sleep);
             waited += sleep;
-            if (readFile(message, file)) {
-                startFlag = true;
-                Thread.sleep(1000);
+            try {
+                if (readFile(message, file)) {
+                    startFlag = true;
+                    Thread.sleep(1000);
+                }
+            } catch (FileNotFoundException e) {
+                // keep trying
             }
         }
         return (waited > timeout);
@@ -144,7 +148,6 @@ class DevTest extends AbstractIntegrationTest {
         }
 
         // verify that the target directory was created
-        targetDir = new File(buildDir, "build");
         assertTrue(targetDir.exists());
     }
 
@@ -159,7 +162,7 @@ class DevTest extends AbstractIntegrationTest {
         replaceString("</feature>", "</feature>\n" + "    <feature>mpHealth-2.0</feature>", srcServerXML);
 
         // check for server configuration was successfully updated message in messages.log
-        assertFalse(checkServerMessage(60000, "CWWKG0017I", messagesLogFile));
+        assertFalse(checkServerMessage(60000, "CWWKG0017I"));
         Thread.sleep(2000);
         Scanner scanner = new Scanner(targetServerXML);
         boolean foundUpdate = false;
