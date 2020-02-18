@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.NoSuchFileException;
 
 class DevTest extends AbstractIntegrationTest {
     static final String projectName = "basic-dev-project";
@@ -83,27 +84,18 @@ class DevTest extends AbstractIntegrationTest {
             throws InterruptedException, FileNotFoundException {
         int waited = 0;
         boolean startFlag = false;
-        Scanner scanner = null;
-        try {
-            while (!startFlag && waited <= timeout) {
-                int sleep = 100;
-                Thread.sleep(sleep);
-                waited += sleep;
-                try {
-                    if (scanner == null) {
-                        scanner = new Scanner(file);
-                    }
-                    if (readFile(scanner, message, file)) {
-                        startFlag = true;
-                        Thread.sleep(1000);
-                    }
-                } catch (FileNotFoundException e) {
-                    // keep trying to read file with Scanner
+        while (!startFlag && waited <= timeout) {
+            int sleep = 100;
+            Thread.sleep(sleep);
+            waited += sleep;
+            try {
+                String content = new String(Files.readAllBytes(file.toPath()));
+                if (content.contains(message)) {
+                    startFlag = true;
+                    Thread.sleep(1000);
                 }
-            }
-        } finally {
-            if (scanner != null) {
-                scanner.close();
+            } catch (NoSuchFileException e) {
+                // keep trying
             }
         }
         return (waited > timeout);
