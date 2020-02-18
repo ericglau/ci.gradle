@@ -101,16 +101,6 @@ class DevTest extends AbstractIntegrationTest {
         return (waited > timeout);
     }
 
-    private static boolean readFile(Scanner scanner, String str, File file) throws FileNotFoundException {
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            if (line.contains(str)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static void startProcess(String params, boolean isDevMode) throws IOException, InterruptedException, FileNotFoundException {
         // get gradle wrapper from project root dir
         File gradlew;
