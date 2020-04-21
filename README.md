@@ -29,11 +29,22 @@ To build the plugin and run the integration tests execute the following commands
 
 ### Adding the plugin to the build script
 
-Within your Gradle build script, you need to set up the classpath to include the Liberty Gradle plugin. You also need to define the Maven Central repository to find the plugin and its dependencies.
+To use the Liberty Gradle plugin, include the following code in your build script.  This sets up the classpath to include the Liberty Gradle plugin, and also defines the Maven Central repository to find the plugin and its dependencies.
 
-If you are using a snapshot version of the plugin make sure to define the Sonatype Nexus Snapshots repository in addition to the Maven Central repository.
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.0'
+    }
+}
 
-Your build script should look like this:
+apply plugin: 'liberty'
+```
+
+If you are using a snapshot version of the plugin make sure to define the Sonatype Nexus Snapshots repository in addition to the Maven Central repository.  Your build script should look like this:
 
 ```groovy
 buildscript {
@@ -48,13 +59,10 @@ buildscript {
         classpath 'io.openliberty.tools:liberty-gradle-plugin:3.0-SNAPSHOT'
     }
 }
-```
 
-To use the Liberty Gradle Plugin, include the following code in your build script:
-
-```groovy
 apply plugin: 'liberty'
 ```
+
 
 ## Plugin Configuration
 
